@@ -1,3 +1,13 @@
+
+/* =========================
+   Event Turn(NOT IMPLEMENTED YET)
+   ========================= */
+
+export type SystemIntentType =
+    | "ADVANCE_PHASE"
+    | "ADVANCE_TURN";
+
+
 /* =========================
    Event System (Canonical)
    ========================= */
@@ -36,7 +46,8 @@ export interface StateChange {
 
 export interface AgentIntent {
     actorId: string;
-    intentType: string;
+    intentType: string; // stays generic
     payload: Record<string, any>;
     confidence: number;
 }
+

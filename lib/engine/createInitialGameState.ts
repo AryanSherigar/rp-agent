@@ -9,9 +9,11 @@ export function createInitialGameState(): GameState {
             tick: 0,
             createdAt: now,
             lastUpdatedAt: now,
-            enabledSystems: ["movement"]
-        },
+            enabledSystems: ["movement"],
 
+            currentTurn: "PLAYER",
+            phase: "START"
+        },
         world: {
             locations: {
                 village: {
@@ -61,7 +63,43 @@ export function createInitialGameState(): GameState {
                     flags: []
                 },
                 metadata: {}
+            },
+            {
+                id: "npc-1",
+                name: "Villager",
+                role: "npc",
+
+                personality: {
+                    traits: ["cautious"],
+                    archetype: "commoner"
+                },
+
+                emotions: {
+                    trust: 0.4,
+                    fear: 0.3,
+                    anger: 0.1,
+                    hope: 0.5
+                },
+
+                motivations: {
+                    primaryGoal: "Stay safe",
+                    secondaryGoals: [],
+                    fears: ["danger"],
+                    desires: []
+                },
+
+                memory: { shortTerm: [], longTerm: [] },
+                relationships: [],
+
+                status: {
+                    alive: true,
+                    locationId: "forest",
+                    flags: []
+                },
+
+                metadata: {}
             }
+
         ],
 
         storyDNA: {

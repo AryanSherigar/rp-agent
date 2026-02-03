@@ -1,4 +1,12 @@
 /* =========================
+   Turn State
+   ========================= */
+export type TurnOwner = "PLAYER" | "NPC" | "WORLD";
+
+export type PhaseType = "START" | "ACTION" | "RESOLVE";
+
+
+/* =========================
    Root Game State Contract
    ========================= */
 
@@ -21,6 +29,8 @@ export interface MetaState {
     createdAt: string;
     lastUpdatedAt: string;
     enabledSystems: string[];
+    currentTurn: TurnOwner;
+    phase: PhaseType;
 }
 
 /* =========================

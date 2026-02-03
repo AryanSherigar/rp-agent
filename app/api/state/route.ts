@@ -5,9 +5,21 @@ export async function GET(req: Request) {
     const gameId = searchParams.get("gameId");
 
     if (!gameId) {
-        return new Response("Missing gameId", { status: 400 });
+        return Response.json(
+            { error: "Missing gameId" },
+            { status: 400 }
+        );
     }
 
-    const state = getGame(gameId);
-    return Response.json(state);
+    const game = getGame(gameId);
+
+    if (!game) {
+        return Response.json(
+            { error: "Game not found" },
+            { status: 404 }
+        );
+    }
+
+    // IMPORTANT: return ONLY plain state, not the game object
+    return Response.json(game.state);
 }
