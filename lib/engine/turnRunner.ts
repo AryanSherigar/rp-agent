@@ -13,45 +13,49 @@ import { runCharacterAgent } from "@/lib/agents/characterAgent";
  */
 export async function runTurnCycle(
     state: GameState,
-    initialIntent: AgentIntent
+    initialIntent: AgentIntent | null
 ): Promise<GameState> {
     let nextState = state;
 
-    // 0..Director Agent (not fully implemented)
+    /* ---------- 0. Director Agent ---------- */
 
     const directorDecision = await runDirectorAgent({
         state: nextState,
         playerIntent: initialIntent,
     });
-    nextState = logDirectorDecision(nextState, directorDecision)
 
-    console.log("Director constraints:", directorDecision.constraints)
+    nextState = logDirectorDecision(nextState, directorDecision);
+    console.log("Director constraints:", directorDecision.constraints);
 
-    // 1. Apply initial intent (PLAYER)
-    const initialEvents = reduceIntent(nextState, initialIntent);
+    /* ---------- 1. Player Intent ---------- */
 
-    //  GUARD: no-op intent
-    if (initialEvents.length === 0) {
-        return state; // absolutely nothing advances
+    if (initialIntent) {
+        const initialEvents = reduceIntent(nextState, initialIntent);
+
+        // Guard: intent produced no events → nothing happens
+        if (initialEvents.length === 0) {
+            return state;
+        }
+
+        nextState = applyAll(nextState, initialEvents);
     }
 
-    nextState = applyAll(nextState, initialEvents);
+    /* ---------- 2. Advance phase: START → ACTION → RESOLVE ---------- */
 
-
-    // 2. Advance phase: START -> ACTION -> RESOLVE
     nextState = advance(nextState, "ADVANCE_PHASE");
     nextState = advance(nextState, "ADVANCE_PHASE");
 
-    // 3. Advance turn: PLAYER -> NPC
+    /* ---------- 3. Advance turn: PLAYER → NPC ---------- */
+
     nextState = advance(nextState, "ADVANCE_TURN");
 
-    // 4. NPC ACTION phase
-    // 4. NPC ACTION phase
-    nextState = advance(nextState, "ADVANCE_PHASE"); // START -> ACTION
+    /* ---------- 4. NPC ACTION phase ---------- */
+
+    nextState = advance(nextState, "ADVANCE_PHASE"); // START → ACTION
 
     let npcIntents: AgentIntent[] = [];
 
-    // 4a. Try Character Agents first (stubbed for now)
+    // 4a. Try Gemini-backed Character Agents
     for (const character of nextState.characters) {
         if (character.role === "player") continue;
 
@@ -66,7 +70,7 @@ export async function runTurnCycle(
         }
     }
 
-    // 4b. Fallback to deterministic NPC agent if no character acted
+    // 4b. Fallback to deterministic NPC agent
     if (npcIntents.length === 0) {
         const fallbackIntent = npcAgent(nextState);
         if (fallbackIntent) {
@@ -74,33 +78,35 @@ export async function runTurnCycle(
         }
     }
 
-    // 4c. Apply intents
+    // 4c. Apply NPC intents
     for (const intent of npcIntents) {
         nextState = applyAll(nextState, reduceIntent(nextState, intent));
     }
 
+    /* ---------- 5. NPC RESOLVE ---------- */
 
-    // 5. NPC RESOLVE
     nextState = advance(nextState, "ADVANCE_PHASE");
 
-    // 6. Advance turn: NPC -> WORLD
+    /* ---------- 6. Advance turn: NPC → WORLD ---------- */
+
     nextState = advance(nextState, "ADVANCE_TURN");
 
-    // WORLD ACTION phase
-    nextState = advance(nextState, "ADVANCE_PHASE"); // START -> ACTION
+    /* ---------- 7. WORLD ACTION ---------- */
+
+    nextState = advance(nextState, "ADVANCE_PHASE");
 
     const worldIntents = worldAgent(nextState);
     for (const intent of worldIntents) {
         nextState = applyAll(nextState, reduceIntent(nextState, intent));
     }
 
+    /* ---------- 8. WORLD RESOLVE ---------- */
 
-    // WORLD RESOLVE
     nextState = advance(nextState, "ADVANCE_PHASE");
 
-    // 7. Advance turn: WORLD -> PLAYER
-    nextState = advance(nextState, "ADVANCE_TURN");
+    /* ---------- 9. Advance turn: WORLD → PLAYER ---------- */
 
+    nextState = advance(nextState, "ADVANCE_TURN");
 
     return nextState;
 }
@@ -112,7 +118,7 @@ function advance(state: GameState, intentType: string): GameState {
         actorId: "system",
         intentType,
         payload: {},
-        confidence: 1
+        confidence: 1,
     });
 
     return applyAll(state, events);
@@ -136,11 +142,10 @@ function logDirectorDecision(
         stateChanges: [],
         tick: state.meta.tick + 1,
         createdAt: new Date().toISOString(),
-    }
+    };
 
     return {
         ...state,
         history: [...state.history, event],
-    }
+    };
 }
-

@@ -1,17 +1,29 @@
 import { getGame, updateGame } from "@/lib/store/memoryStore";
 import { runTurnCycle } from "@/lib/engine/turnRunner";
 import { runNarratorAgent } from "@/lib/agents/narratorAgent";
+import { runPlayerIntentAgent } from "@/lib/agents/playerIntentAgent";
+
 
 export async function POST(req: Request) {
-    const { gameId, intent, demo } = await req.json();
+    const { gameId, playerText, demo } = await req.json();
+
 
     const previousState = getGame(gameId);
     if (!previousState) {
         return new Response("Game not found", { status: 404 });
     }
+    const initialIntent = await runPlayerIntentAgent({
+        playerText,
+        state: previousState,
+    });
 
     // Run one full turn
-    const nextState = await runTurnCycle(previousState, intent);
+    const nextState = await runTurnCycle(
+        previousState,
+        initialIntent
+    );
+
+
 
     // Generate narration
     const narration = await runNarratorAgent({
@@ -53,7 +65,9 @@ export async function POST(req: Request) {
             eventsThisTurn,
             storyDNADelta,
         };
+        console.log("Narrator events count:", eventsThisTurn.length);
     }
+
 
     return Response.json({
         state: nextState,

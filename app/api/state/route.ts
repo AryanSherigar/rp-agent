@@ -11,15 +11,17 @@ export async function GET(req: Request) {
         );
     }
 
-    const game = getGame(gameId);
+    const state = getGame(gameId);
 
-    if (!game) {
+    if (!state) {
         return Response.json(
             { error: "Game not found" },
             { status: 404 }
         );
     }
 
-    // IMPORTANT: return ONLY plain state, not the game object
-    return Response.json(game.state);
+    // IMPORTANT: normalize GameState to plain JSON
+    return Response.json(
+        JSON.parse(JSON.stringify(state))
+    );
 }
