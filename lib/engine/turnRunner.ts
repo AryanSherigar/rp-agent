@@ -3,7 +3,7 @@ import { reduceIntent } from "./reducer";
 import { applyEvent } from "./StateManager";
 import { AgentIntent } from "./Event";
 import { npcAgent } from "@/lib/agents/npcAgent";
-import { worldAgent } from "@/lib/agents/worldAgent";
+import { worldAgent } from "../agents/worldAgent";
 
 /**
  * Runs one full deterministic turn cycle if possible.
@@ -16,7 +16,15 @@ export function runTurnCycle(
     let nextState = state;
 
     // 1. Apply initial intent (PLAYER)
-    nextState = applyAll(nextState, reduceIntent(nextState, initialIntent));
+    const initialEvents = reduceIntent(nextState, initialIntent);
+
+    //  GUARD: no-op intent
+    if (initialEvents.length === 0) {
+        return state; // absolutely nothing advances
+    }
+
+    nextState = applyAll(nextState, initialEvents);
+
 
     // 2. Advance phase: START -> ACTION -> RESOLVE
     nextState = advance(nextState, "ADVANCE_PHASE");

@@ -41,6 +41,34 @@ function handleMove(
         return [];
     }
 
+    const worldLocation = state.world.locations[targetLocation];
+
+    //  Location does not exist → request discovery instead of moving
+    if (!worldLocation) {
+        const event: GameEvent = {
+            id: crypto.randomUUID(),
+            schemaVersion: "1.0.0",
+            type: "world",
+            actorId: "world",
+            description: `Discovery requested for location: ${targetLocation}`,
+            intent: {
+                actorId: "world",
+                intentType: "DISCOVER_LOCATION",
+                payload: {
+                    locationId: targetLocation,
+                    fromLocationId: currentLocation
+                },
+                confidence: 0.8
+            },
+            stateChanges: [],
+            tick: state.meta.tick + 1,
+            createdAt: new Date().toISOString()
+        };
+
+        return [event];
+    }
+
+
     const stateChanges: StateChange[] = [
         {
             path: `characters.${state.characters.indexOf(actor)}.status.locationId`,

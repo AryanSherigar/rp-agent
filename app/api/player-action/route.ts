@@ -9,8 +9,12 @@ export async function POST(req: Request) {
         return new Response("Game not found", { status: 404 });
     }
 
+    
     const nextState = runTurnCycle(state, intent);
 
+    if (nextState === state) {
+        return Response.json(state); // explicit no-op
+    }
     updateGame(gameId, nextState);
     return Response.json(nextState);
 }
