@@ -48,3 +48,25 @@ export type DirectorDecision = {
      */
     confidence: number
 }
+
+/**
+ * Input provided to a Character Agent.
+ * This is READ-ONLY.
+ */
+export type CharacterAgentInput = {
+    /**
+     * Frozen snapshot of the game state.
+     */
+    state: GameState
+
+    /**
+     * The character this agent controls.
+     */
+    characterId: string
+
+    /**
+     * Director constraints for this turn.
+     */
+    directorDecision: DirectorDecision
+}
+
