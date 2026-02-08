@@ -3,20 +3,19 @@
 import PlayClient from "./PlayClient";
 
 export default async function PlayPage() {
-    // TEMP: hardcode gameId for now
-    // later you can read from search params or session
-    const gameId = "efdc1aed-5ef0-42e2-90f4-5a78c190df5e";
-
     const res = await fetch(
-        `http://localhost:3000/api/state?gameId=${gameId}`,
-        { cache: "no-store" }
+        `http://localhost:3000/api/start-game`,
+        {
+            method: "POST",
+            cache: "no-store"
+        }
     );
 
     if (!res.ok) {
-        return <div className="p-6">Failed to load game.</div>;
+        return <div className="p-6">Failed to start game.</div>;
     }
 
-    const state = await res.json();
+    const { gameId, state } = await res.json();
 
     return (
         <PlayClient
