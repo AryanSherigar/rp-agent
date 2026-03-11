@@ -40,7 +40,7 @@ To handle long context efficiently, Chronos uses a "Story Card" system.
 
 ##  Technical Architecture
 
-Chronos is built with **React**, **TypeScript**, and the **Google Gen AI SDK**.
+Chronos is built with **React**, **TypeScript**, and a server-side **Google Gen AI SDK** integration.
 
 ```mermaid
 graph TD
@@ -95,9 +95,12 @@ npm install
 Create a `.env` file in the root directory:
 ```env
 GEMINI_API_KEY=your_google_ai_studio_key_here
+# Optional hard token for API route requests
+TURN_API_SECRET=your_internal_turn_token
 
 ```
 
+The Gemini key is read only by the backend `/api/turn` route and is never injected into client bundles.
 
 4. **Run the Development Server**
 ```bash
