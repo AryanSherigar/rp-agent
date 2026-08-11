@@ -53,6 +53,54 @@ npm run dev
 
 Navigate to `http://localhost:3000` to access Mission Control and initialize your first simulation!
 
+## Running with Docker
+ 
+If you'd rather skip the local Node setup, you can run Chronos in a container instead.
+ 
+### 1. Configure Environment
+ 
+Create a `.env` file in the root directory, just like in the Quick Start section above:
+ 
+```env
+GEMINI_API_KEY=your_google_ai_studio_key_here
+```
+ 
+### 2. Build the Image
+ 
+```bash
+docker build -t chronos .
+```
+ 
+### 3. Run the Container
+ 
+```bash
+docker run -p 3000:3000 --env-file .env chronos
+```
+ 
+Navigate to `http://localhost:3000` to access Mission Control, same as before.
+ 
+### Using Docker Compose
+ 
+If you prefer Compose, create a `docker-compose.yml` in the project root:
+ 
+```yaml
+version: "3.8"
+services:
+  chronos:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+```
+ 
+Then start it with:
+ 
+```bash
+docker compose up --build
+```
+ 
+
 ## Usage
 
 Chronos offers advanced features designed to give you unprecedented control over the AI's narrative generation.
